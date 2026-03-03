@@ -3,57 +3,79 @@ class_name Player extends CharacterBody3D
 const SPEED = 5.0
 const JUMP_VELOCITY = 4.5
 
-# Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 @export var _player_input : PlayerInput
-@export var _camera_input : CameraInput
+@export var _camera_input : Node3D # Generic Node3D to avoid cyclic dependency issues
 @export var _player_model : Node3D
-@export var _state_machine: RewindableStateMachine
 
-@onready var rollback_synchronizer = $RollbackSynchronizer
-
-var _animation_player
+var _animation_player: AnimationPlayer
 
 func _enter_tree():
-	_player_input.set_multiplayer_authority(str(name).to_int())
-	_camera_input.set_multiplayer_authority(str(name).to_int())
+	set_multiplayer_authority(str(name).to_int())
+	if _player_input:
+		_player_input.set_multiplayer_authority(str(name).to_int())
+	if _camera_input:
+		_camera_input.set_multiplayer_authority(str(name).to_int())
 
 func _ready():
-	# Default state
-	_state_machine.state = &"IdleState"
-	_animation_player = _player_model.get_node("AnimationPlayer")
+	if _player_model:
+		_animation_player = _player_model.get_node_or_null("AnimationPlayer")
 	
-	# TODO: can this be moved to movement_state
-	_state_machine.on_display_state_changed.connect(_on_display_state_changed)
+	# Hide loading screen if we are the local player
+	if is_multiplayer_authority() and multiplayer.get_unique_id() == str(name).to_int():
+		# Assuming NetworkManager exists and has this method
+		if NetworkManager.has_method("hide_loading"):
+			NetworkManager.hide_loading()
+		
+		# Setup camera if it's ours
+		var cam = _camera_input.get_node_or_null("Camera3D")
+		if cam:
+			cam.current = true
 
-	# Call this after setting authority
-	# https://foxssake.github.io/netfox/netfox/tutorials/responsive-player-movement/#ownership
-	rollback_synchronizer.process_settings()
-	
-	# Hide the loading screen once our player is spawned in game and ready
-	if multiplayer.get_unique_id() == str(name).to_int():
-		NetworkManager.hide_loading()
+func _physics_process(delta):
+	if not is_multiplayer_authority():
+		return
 
-func _rollback_tick(delta: float, tick: int, is_fresh: bool) -> void:
-	_force_update_is_on_floor()
+	# Add gravity
 	if not is_on_floor():
-		apply_gravity(delta)
+		velocity.y -= gravity * delta
 
-func _on_display_state_changed(old_state, new_state):
-	# print("Old state %s, new %s" % [old_state, new_state])
+	# Handle Jump
+	if _player_input and _player_input.jump_input and is_on_floor():
+		velocity.y = JUMP_VELOCITY
+
+	# Get the input direction and handle the movement/deceleration
+	var input_dir = Vector2.ZERO
+	if _player_input:
+		input_dir = _player_input.input_dir
 	
-	var animation_name = new_state.animation_name
-	if _animation_player && animation_name != "":
-		# print("Play animation %s" % animation_name)
-		_animation_player.play(animation_name)
+	var direction = Vector3.ZERO
+	if _camera_input:
+		# Use camera basis to align movement
+		var cam_basis = _camera_input.global_transform.basis
+		direction = (cam_basis * Vector3(input_dir.x, 0, input_dir.y))
+		direction.y = 0
+		direction = direction.normalized()
 
-func apply_gravity(delta):
-	velocity.y -= gravity * delta
-				
-# https://foxssake.github.io/netfox/netfox/tutorials/rollback-caveats/#characterbody-on-floor
-func _force_update_is_on_floor():
-	var old_velocity = velocity
-	velocity *= 0
+	if direction:
+		velocity.x = direction.x * SPEED
+		velocity.z = direction.z * SPEED
+		
+		# Simple visual rotation
+		if _player_model:
+			var target_look = position + direction
+			_player_model.look_at(Vector3(target_look.x, _player_model.global_position.y, target_look.z), Vector3.UP)
+			
+		if _animation_player:
+			if is_on_floor():
+				_animation_player.play("male_animation_lib/walk")
+			else:
+				_animation_player.play("male_animation_lib/jump")
+	else:
+		velocity.x = move_toward(velocity.x, 0, SPEED)
+		velocity.z = move_toward(velocity.z, 0, SPEED)
+		if _animation_player and is_on_floor():
+			_animation_player.play("male_animation_lib/idle")
+
 	move_and_slide()
-	velocity = old_velocity

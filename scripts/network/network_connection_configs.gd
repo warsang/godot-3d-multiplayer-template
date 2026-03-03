@@ -1,9 +1,11 @@
-extends Resource
 class_name NetworkConnectionConfigs
+extends RefCounted
 
-@export var host_ip: String = ""
-@export var host_port: int = -1
-@export var game_id: String = ""
+var host_ip: String = "127.0.0.1"
+var host_port: int = 7000
+var game_id: String = ""
 
-func _init(host_ip_: String):
-	host_ip = host_ip_
+func _init(p_host_ip: String = "127.0.0.1", p_host_port: int = 7000, p_game_id: String = ""):
+	host_ip = p_host_ip
+	host_port = p_host_port
+	game_id = p_game_id

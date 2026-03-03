@@ -1,0 +1,69 @@
+[gd_scene load_steps=2 format=3 uid="uid://b8x6q6q6q6q6"]
+
+[ext_resource type="Script" path="res://addons/godot_fuzz/FuzzControl.gd" id="1_x8x8x"]
+
+[node name="FuzzControl" type="CanvasLayer"]
+script = ExtResource("1_x8x8x")
+
+[node name="Panel" type="Panel" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -300.0
+offset_bottom = 250.0
+grow_horizontal = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="Panel/VBoxContainer"]
+layout_mode = 2
+text = "Fuzzing Control"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="EnableFuzzing" type="CheckButton" parent="Panel/VBoxContainer"]
+layout_mode = 2
+text = "Enable Fuzzing"
+
+[node name="ProbabilityLabel" type="Label" parent="Panel/VBoxContainer"]
+layout_mode = 2
+text = "Fuzz Probability: 0.1"
+
+[node name="ProbabilitySlider" type="HSlider" parent="Panel/VBoxContainer"]
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 0.1
+
+[node name="HSeparator2" type="HSeparator" parent="Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="EnableBuffering" type="CheckButton" parent="Panel/VBoxContainer"]
+layout_mode = 2
+text = "Buffer Packets"
+
+[node name="FlushBuffer" type="Button" parent="Panel/VBoxContainer"]
+layout_mode = 2
+text = "Flush Buffer"
+
+[node name="StatusLabel" type="Label" parent="Panel/VBoxContainer"]
+layout_mode = 2
+text = "Status: Passive"
+horizontal_alignment = 1
+
+[connection signal="toggled" from="Panel/VBoxContainer/EnableFuzzing" to="." method="_on_enable_fuzzing_toggled"]
+[connection signal="value_changed" from="Panel/VBoxContainer/ProbabilitySlider" to="." method="_on_probability_slider_value_changed"]
+[connection signal="toggled" from="Panel/VBoxContainer/EnableBuffering" to="." method="_on_enable_buffering_toggled"]
+[connection signal="pressed" from="Panel/VBoxContainer/FlushBuffer" to="." method="_on_flush_buffer_pressed"]

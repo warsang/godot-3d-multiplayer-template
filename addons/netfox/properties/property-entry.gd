@@ -8,9 +8,13 @@ var property: String
 static var _logger := _NetfoxLogger.for_netfox("PropertyEntry")
 
 func get_value() -> Variant:
+	if node == null:
+		return null
 	return node.get_indexed(property)
 
 func set_value(value):
+	if node == null:
+		return
 	node.set_indexed(property, value)
 
 func is_valid() -> bool:

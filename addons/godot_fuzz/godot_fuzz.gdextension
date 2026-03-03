@@ -1,0 +1,21 @@
+[configuration]
+entry_symbol = "fuzz_library_init"
+compatibility_minimum = "4.2"
+
+[libraries]
+
+windows.debug.x86_64 = "res://addons/godot_fuzz/bin/libgodot_fuzz.dll"
+
+windows.release.x86_64 = "res://addons/godot_fuzz/bin/libgodot_fuzz.dll"
+
+windows.editor.x86_64 = "res://addons/godot_fuzz/bin/libgodot_fuzz.dll"
+
+linux.debug.x86_64 = "res://addons/godot_fuzz/bin/libgodot_fuzz.so"
+
+linux.release.x86_64 = "res://addons/godot_fuzz/bin/libgodot_fuzz.so"
+
+
+
+macos.debug = "res://addons/godot_fuzz/bin/libgodot_fuzz.framework"
+
+macos.release = "res://addons/godot_fuzz/bin/libgodot_fuzz.framework"

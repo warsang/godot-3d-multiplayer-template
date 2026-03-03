@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://bovdouhtnq13k"]
 
-[ext_resource type="Script" path="res://scripts/menus/noray_menu.gd" id="1_v4v6j"]
+[ext_resource type="Script" uid="uid://c1boib38hgsr1" path="res://scripts/menus/noray_menu.gd" id="1_v4v6j"]
 [ext_resource type="Theme" uid="uid://giidcej8oij7" path="res://asssets/ui/menu_theme.tres" id="1_xu2a1"]
 
 [sub_resource type="FontFile" id="FontFile_3e0mp"]
